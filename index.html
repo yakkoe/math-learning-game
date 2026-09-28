@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#0b1220" />
+  <title>Mathe & Informatik Lernspiel</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --bg2: #101b2a;
+      --panel: #172334;
+      --panel-strong: #1c2d45;
+      --panel-alt: #0f1b2a;
+      --text: #edf5ff;
+      --muted: #9bb2c9;
+      --border: rgba(155, 179, 214, 0.22);
+      --accent: #63d2ff;
+      --accent-2: #8b7dff;
+      --success: #34d399;
+      --danger: #f87171;
+      --warning: #fbbf24;
+      --shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      background:
+        radial-gradient(circle at top, rgba(99, 210, 255, 0.18), transparent 30%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+    }
+
+    #app {
+      width: 100%;
+      max-width: 520px;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding:
+        calc(env(safe-area-inset-top, 0px) + 10px)
+        calc(env(safe-area-inset-right, 0px) + 12px)
+        calc(env(safe-area-inset-bottom, 0px) + 12px)
+        calc(env(safe-area-inset-left, 0px) + 12px);
+      background: rgba(6, 11, 18, 0.46);
+    }
+
+    .topbar {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 8px 4px 12px;
+    }
+
+    .title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: clamp(1.1rem, 2.8vw, 1.5rem);
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .badge {
+      color: var(--text);
+      background: rgba(99, 210, 255, 0.12);
+      border: 1px solid rgba(99, 210, 255, 0.3);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .select-wrap {
+      position: relative;
+    }
+
+    select {
+      width: 100%;
+      height: 46px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(23, 35, 52, 0.9);
+      color: var(--text);
+      padding: 0 44px 0 12px;
+      font-size: 16px;
+      appearance: none;
+      outline: none;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.01);
+    }
+
+    .select-wrap::after {
+      content: "▾";
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+      font-size: 18px;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+      padding-bottom: 8px;
+    }
+
+    .status-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      flex: 1 1 32%;
+      min-width: 90px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow);
+    }
+
+    .stat .label {
+      color: var(--muted);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .stat strong {
+      font-size: clamp(1.05rem, 4vw, 1.5rem);
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .question-card {
+      flex: 1 1 auto;
+      background: linear-gradient(180deg, rgba(28,45,69,0.9), rgba(16,26,42,0.96));
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 18px 16px 14px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 150px;
+      overflow: hidden;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-self: flex-start;
+      align-items: center;
+      background: rgba(139, 125, 255, 0.13);
+      border: 1px solid rgba(139, 125, 255, 0.35);
+      color: #dfe4ff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      padding: 7px 10px;
+    }
+
+    .question {
+      margin: 0;
+      font-size: clamp(1.2rem, 6.2vw, 2.2rem);
+      line-height: 1.3;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      word-break: break-word;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    .feedback {
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 0.96rem;
+      border: 1px solid transparent;
+      line-height: 1.5;
+      display: none;
+    }
+
+    .feedback.show {
+      display: block;
+    }
+
+    .feedback.success {
+      background: rgba(52, 211, 153, 0.12);
+      color: #d9ffef;
+      border-color: rgba(52, 211, 153, 0.4);
+    }
+
+    .feedback.error {
+      background: rgba(248, 113, 113, 0.12);
+      color: #ffd7d7;
+      border-color: rgba(248, 113, 113, 0.45);
+    }
+
+    .feedback.info {
+      background: rgba(99, 210, 255, 0.08);
+      color: #dff7ff;
+      border-color: rgba(99, 210, 255, 0.3);
+    }
+
+    .solution-panel {
+      display: none;
+      background: rgba(17, 29, 43, 0.96);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px 14px 12px;
+      box-shadow: var(--shadow);
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .solution-panel.show {
+      display: block;
+    }
+
+    .solution-title {
+      margin: 0 0 10px;
+      color: #dfe8ff;
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+    }
+
+    .solution-panel ol,
+    .solution-panel ul {
+      margin: 0;
+      padding-left: 1.2rem;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .solution-panel li {
+      margin-bottom: 6px;
+    }
+
+    .answer-bar {
+      position: sticky;
+      bottom: 0;
+      z-index: 20;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding-top: 8px;
+      background: linear-gradient(180deg, rgba(11,18,32,0.1), rgba(11,18,32,0.92) 25%);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
+    }
+
+    .answer-wrap {
+      flex: 1 1 auto;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: rgba(23,35,52,0.96);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 6px 8px;
+      box-shadow: var(--shadow);
+    }
+
+    input[type="text"] {
+      flex: 1 1 auto;
+      min-width: 0;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.3;
+      min-height: 44px;
+      padding: 8px 6px;
+      -webkit-appearance: none;
+      appearance: none;
+      border-radius: 10px;
+    }
+
+    input::placeholder {
+      color: #8ea3bc;
+    }
+
+    button {
+      border: none;
+      outline: none;
+      border-radius: 14px;
+      min-height: 46px;
+      padding: 0 16px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.12s ease, opacity 0.12s ease;
+      -webkit-appearance: none;
+      appearance: none;
+      touch-action: manipulation;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #091421;
+    }
+
+    .ghost {
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .danger {
+      background: rgba(248, 113, 113, 0.12);
+      color: #ffd7d7;
+      border: 1px solid rgba(248,113,113,0.35);
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      align-items: center;
+      justify-content: stretch;
+    }
+
+    .controls .primary,
+    .controls .ghost,
+    .controls .danger {
+      flex: 1 1 0;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (min-width: 560px) {
+      #app {
+        border-left: 1px solid rgba(255,255,255,0.04);
+        border-right: 1px solid rgba(255,255,255,0.04);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="title">
+        <h1>Mathe &amp; Informatik</h1>
+        <span class="badge">Quiz</span>
+      </div>
+
+      <div class="select-wrap">
+        <select id="categorySelect" aria-label="Kategorie auswählen">
+          <option value="einmaleins">Einmaleins</option>
+          <option value="bruchrechnung">Bruchrechnung</option>
+          <option value="quadratzahlen">Quadratzahlen</option>
+          <option value="fakultaet">Fakultät</option>
+          <option value="potenzen">Potenzen</option>
+          <option value="logarithmen">Logarithmen</option>
+          <option value="logarithmen_wurzeln">Logarithmen mit Wurzeln</option>
+          <option value="binaer">Binärsystem</option>
+          <option value="hex">Hexadezimalsystem</option>
+          <option value="modulo">Modulo</option>
+          <option value="boolesche_logik">Boolesche Logik</option>
+        </select>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="status-row">
+        <div class="stat">
+          <span class="label">Punkte</span>
+          <strong id="scoreValue">0</strong>
+        </div>
+        <div class="stat">
+          <span class="label">Zeit</span>
+          <strong id="timerValue">60</strong>
+        </div>
+        <div class="stat">
+          <span class="label">Highscore</span>
+          <strong id="highscoreValue">0</strong>
+        </div>
+      </div>
+
+      <section class="question-card">
+        <span class="tag" id="categoryBadge">Einmaleins</span>
+        <h2 class="question" id="questionText">Berechne 8 × 7</h2>
+        <div class="meta" id="questionMeta">Schnell und exakt rechnen.</div>
+      </section>
+
+      <div id="feedbackBox" class="feedback" role="status" aria-live="polite"></div>
+      <div id="solutionPanel" class="solution-panel" aria-live="polite"></div>
+    </main>
+
+    <div class="answer-bar">
+      <div class="answer-wrap">
+        <input
+          id="answerInput"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="none"
+          spellcheck="false"
+          aria-label="Antwort eingeben"
+          placeholder="Antwort eingeben"
+          title="Antwort"
+        />
+      </div>
+
+      <button id="submitBtn" class="primary" type="button">Prüfen</button>
+    </div>
+
+    <div class="controls">
+      <button id="nextBtn" class="primary hidden" type="button">Weiter</button>
+      <button id="skipBtn" class="ghost" type="button">Überspringen</button>
+      <button id="abortBtn" class="danger" type="button">Abbrechen</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
